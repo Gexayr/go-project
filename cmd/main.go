@@ -1,0 +1,25 @@
+package main
+
+import (
+	"adv/configs"
+	"adv/internal/auth"
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	conf := configs.LoadConfig()
+	fmt.Println(conf)
+	router := http.NewServeMux()
+	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
+		Config: conf,
+	})
+
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
+	}
+
+	fmt.Println("localhost:8080")
+	server.ListenAndServe()
+}
