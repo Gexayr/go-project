@@ -3,13 +3,15 @@ package main
 import (
 	"adv/configs"
 	"adv/internal/auth"
+	"adv/pkg/db"
 	"fmt"
 	"net/http"
 )
 
 func main() {
 	conf := configs.LoadConfig()
-	fmt.Println(conf)
+	_ = db.NewDb(conf)
+	//fmt.Println(conf)
 	router := http.NewServeMux()
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
 		Config: conf,
