@@ -35,7 +35,7 @@ func (handler *LinkHandler) Create() http.HandlerFunc {
 		link := NewLink(body.Url)
 		for {
 			existingLink, _ := handler.LinkRepository.GetByHash(link.Hash)
-			if existingLink != nil {
+			if existingLink == nil {
 				break
 			}
 			link.GenerateHash()
@@ -60,7 +60,11 @@ func (handler *LinkHandler) Update() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, "Invalid id", http.StatusBadRequest)
 		}
-
+		err = handler.LinkRepository.CheckIfExist(uint(id))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
 		link, err := handler.LinkRepository.Update(&Link{
 			Model: gorm.Model{ID: uint(id)},
 			Hash:  body.Hash,
@@ -78,10 +82,22 @@ func (handler *LinkHandler) Update() http.HandlerFunc {
 
 func (handler *LinkHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := r.PathValue("id")
-		data := id
+		idString := r.PathValue("id")
+		id, err := strconv.ParseUint(idString, 10, 32)
+		if err != nil {
+			http.Error(w, "Invalid id", http.StatusBadRequest)
+		}
+		err = handler.LinkRepository.CheckIfExist(uint(id))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		_, err = handler.LinkRepository.Delete(uint(id))
 
-		res.Json(w, data, http.StatusOK)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		res.Json(w, true, http.StatusOK)
 	}
 }
 
