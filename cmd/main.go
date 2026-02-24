@@ -5,6 +5,7 @@ import (
 	"adv/internal/auth"
 	"adv/internal/link"
 	"adv/pkg/db"
+	"adv/pkg/middleware"
 	"fmt"
 	"net/http"
 )
@@ -27,9 +28,14 @@ func main() {
 		LinkRepository: linkReposoitory,
 	})
 
+	stack := middleware.Chain(
+		middleware.CORS,
+		middleware.Logging,
+	)
+
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: router,
+		Handler: stack(router),
 	}
 
 	fmt.Println("localhost:8080")

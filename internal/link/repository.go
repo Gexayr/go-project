@@ -49,10 +49,8 @@ func ErrHandling(link *Link, result *gorm.DB) (*Link, error) {
 	return link, nil
 }
 
-func (repo *LinkRepository) CheckIfExist(id uint) error {
+func (repo *LinkRepository) GetById(id uint) (*Link, error) {
+	var link Link
 	result := repo.Database.DB.First(&Link{}, id)
-	if result.Error != nil {
-		return result.Error
-	}
-	return nil
+	return ErrHandling(&link, result)
 }

@@ -46,7 +46,7 @@ func (handler *LinkHandler) Create() http.HandlerFunc {
 			return
 		}
 		data := createdLink
-		res.Json(w, data, http.StatusOK)
+		res.Json(w, data, http.StatusCreated)
 	}
 }
 func (handler *LinkHandler) Update() http.HandlerFunc {
@@ -60,7 +60,7 @@ func (handler *LinkHandler) Update() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, "Invalid id", http.StatusBadRequest)
 		}
-		err = handler.LinkRepository.CheckIfExist(uint(id))
+		_, err = handler.LinkRepository.GetById(uint(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
@@ -87,7 +87,7 @@ func (handler *LinkHandler) Delete() http.HandlerFunc {
 		if err != nil {
 			http.Error(w, "Invalid id", http.StatusBadRequest)
 		}
-		err = handler.LinkRepository.CheckIfExist(uint(id))
+		_, err = handler.LinkRepository.GetById(uint(id))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
