@@ -31,7 +31,7 @@ func LoadConfig() *Config {
 			os.Getenv("DSN"),
 		},
 		Auth: AuthConfig{
-			os.Getenv("TOKEN"),
+			os.Getenv("SECRET"),
 		},
 	}
 }
