@@ -2,6 +2,7 @@ package main
 
 import (
 	"adv/internal/link"
+	"adv/internal/user"
 	"os"
 
 	"github.com/lpernett/godotenv"
@@ -19,5 +20,5 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	db.AutoMigrate(&link.Link{})
+	db.AutoMigrate(&link.Link{}, &user.User{})
 }
