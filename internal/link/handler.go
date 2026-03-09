@@ -1,9 +1,11 @@
 package link
 
 import (
+	"adv/configs"
 	"adv/pkg/middleware"
 	"adv/pkg/req"
 	"adv/pkg/res"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,6 +14,7 @@ import (
 
 type LinkHandlerDeps struct {
 	LinkRepository *LinkRepository
+	Config         *configs.Config
 }
 type LinkHandler struct {
 	LinkRepository *LinkRepository
@@ -22,13 +25,17 @@ func NewLinkHandler(route *http.ServeMux, deps LinkHandlerDeps) {
 		LinkRepository: deps.LinkRepository,
 	}
 	route.HandleFunc("POST /link", handler.Create())
-	route.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update()))
-	route.Handle("DELETE /link/{id}", middleware.IsAuthed(handler.Delete()))
+	route.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
+	route.Handle("DELETE /link/{id}", middleware.IsAuthed(handler.Delete(), deps.Config))
 	route.HandleFunc("GET /{hash}", handler.GoTo())
 }
 
 func (handler *LinkHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		email, ok := r.Context().Value(middleware.ContextEmailKey).(string)
+		if !ok {
+			fmt.Print(email)
+		}
 		body, err := req.HandleBody[LinkCreateRequest](&w, r)
 		if err != nil {
 			return

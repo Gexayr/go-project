@@ -51,6 +51,6 @@ func (repo *UserRepository) GetById(id uint) (*User, error) {
 
 func (repo *UserRepository) GetByEmail(email string) (*User, error) {
 	var user User
-	result := repo.Database.DB.First(&user, "haemailsh = ?", email)
+	result := repo.Database.DB.First(&user, "email = ?", email)
 	return ErrHandling(&user, result)
 }

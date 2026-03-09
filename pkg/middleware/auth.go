@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"adv/configs"
+	"adv/pkg/jwt"
 	"context"
-	"go/adv-demo/configs"
-	"go/adv-demo/pkg/jwt"
 	"net/http"
 	"strings"
 )
@@ -27,7 +27,7 @@ func IsAuthed(next http.Handler, config *configs.Config) http.Handler {
 			return
 		}
 		token := strings.TrimPrefix(authedHeader, "Bearer ")
-		isValid, data := jwt.NewJWT(config.Auth.Secret).Parse(token)
+		isValid, data := jwt.NewJWT(config.Auth.Secret).ParseToken(token)
 		if !isValid {
 			writeUnauthed(w)
 			return
