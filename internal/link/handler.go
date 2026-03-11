@@ -24,6 +24,7 @@ func NewLinkHandler(route *http.ServeMux, deps LinkHandlerDeps) {
 	handler := &LinkHandler{
 		LinkRepository: deps.LinkRepository,
 	}
+	route.HandleFunc("GET /link", handler.GetAll())
 	route.HandleFunc("POST /link", handler.Create())
 	route.Handle("PATCH /link/{id}", middleware.IsAuthed(handler.Update(), deps.Config))
 	route.Handle("DELETE /link/{id}", middleware.IsAuthed(handler.Delete(), deps.Config))
@@ -57,6 +58,7 @@ func (handler *LinkHandler) Create() http.HandlerFunc {
 		res.Json(w, data, http.StatusCreated)
 	}
 }
+
 func (handler *LinkHandler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := req.HandleBody[LinkUpdateRequest](&w, r)
@@ -120,5 +122,26 @@ func (handler *LinkHandler) GoTo() http.HandlerFunc {
 		data := link
 		//res.Json(w, data, http.StatusOK)
 		http.Redirect(w, r, data.Url, http.StatusTemporaryRedirect)
+	}
+}
+
+func (handler *LinkHandler) GetAll() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+		if err != nil {
+			limit = 20
+		}
+
+		offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+		if err != nil {
+			offset = 0
+		}
+		links := handler.LinkRepository.GetAll(limit, offset)
+		count := handler.LinkRepository.Count()
+		//res.Json(w, data, http.StatusOK)
+		res.Json(w, GetAllLinksResponse{
+			Links: links,
+			Count: count,
+		}, http.StatusOK)
 	}
 }
