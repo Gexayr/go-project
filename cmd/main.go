@@ -1,15 +1,15 @@
 package main
 
 import (
+	"adv/configs"
+	"adv/internal/auth"
+	"adv/internal/link"
+	"adv/internal/stat"
+	"adv/internal/user"
+	"adv/pkg/db"
+	"adv/pkg/event"
+	"adv/pkg/middleware"
 	"fmt"
-	"go/adv-demo/configs"
-	"go/adv-demo/internal/auth"
-	"go/adv-demo/internal/link"
-	"go/adv-demo/internal/stat"
-	"go/adv-demo/internal/user"
-	"go/adv-demo/pkg/db"
-	"go/adv-demo/pkg/event"
-	"go/adv-demo/pkg/middleware"
 	"net/http"
 )
 
@@ -59,7 +59,7 @@ func App() http.Handler {
 func main() {
 	app := App()
 	server := http.Server{
-		Addr:    ":8081",
+		Addr:    ":8080",
 		Handler: app,
 	}
 	fmt.Println("Server is listening on port 8081")

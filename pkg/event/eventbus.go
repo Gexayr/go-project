@@ -1,7 +1,7 @@
 package event
 
 const (
-	EventLinkVisited
+	EventLinkVisited = "link.visited"
 )
 
 type Event struct {
@@ -19,8 +19,8 @@ func NewEventBus() *EventBus {
 	}
 }
 
-func (e *EventBus) Publish(evt Event) {
-	e.bus <- evt
+func (e *EventBus) Publush(event Event) {
+	e.bus <- event
 }
 
 func (e *EventBus) Subscribe() <-chan Event {
