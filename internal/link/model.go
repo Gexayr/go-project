@@ -1,7 +1,7 @@
 package link
 
 import (
-	//"go/adv-demo/internal/stat"
+	"adv/internal/stat"
 	"math/rand"
 
 	"gorm.io/gorm"
@@ -9,9 +9,9 @@ import (
 
 type Link struct {
 	gorm.Model
-	Url  string `json:"url"`
-	Hash string `json:"hash" gorm:"uniqueIndex"`
-	//Stats []stat.Stat `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Url   string      `json:"url"`
+	Hash  string      `json:"hash" gorm:"uniqueIndex"`
+	Stats []stat.Stat `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 func NewLink(url string) *Link {

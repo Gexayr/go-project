@@ -1,50 +1,67 @@
 package main
 
 import (
-	"adv/configs"
-	"adv/internal/auth"
-	"adv/internal/link"
-	"adv/internal/user"
-	"adv/pkg/db"
-	"adv/pkg/middleware"
 	"fmt"
+	"go/adv-demo/configs"
+	"go/adv-demo/internal/auth"
+	"go/adv-demo/internal/link"
+	"go/adv-demo/internal/stat"
+	"go/adv-demo/internal/user"
+	"go/adv-demo/pkg/db"
+	"go/adv-demo/pkg/event"
+	"go/adv-demo/pkg/middleware"
 	"net/http"
 )
 
-func main() {
+func App() http.Handler {
 	conf := configs.LoadConfig()
 	db := db.NewDb(conf)
-	//fmt.Println(conf)
 	router := http.NewServeMux()
+	eventBus := event.NewEventBus()
 
-	//Repositories
-	linkReposoitory := link.NewLinkRepository(db)
-	userReposoitory := user.NewUserRepository(db)
+	// Repositories
+	linkRepository := link.NewLinkRepository(db)
+	userRepository := user.NewUserRepository(db)
+	statRepository := stat.NewStatRepository(db)
 
 	// Services
-	authService := auth.NewAuthService(userReposoitory)
+	authService := auth.NewAuthService(userRepository)
+	statService := stat.NewStatService(&stat.StatServiceDeps{
+		EventBus:       eventBus,
+		StatRepository: statRepository,
+	})
 
-	//Handler
+	// Handler
 	auth.NewAuthHandler(router, auth.AuthHandlerDeps{
 		Config:      conf,
 		AuthService: authService,
 	})
-
 	link.NewLinkHandler(router, link.LinkHandlerDeps{
-		LinkRepository: linkReposoitory,
+		LinkRepository: linkRepository,
+		Config:         conf,
+		EventBus:       eventBus,
+	})
+	stat.NewStatHandler(router, stat.StatHandlerDeps{
+		StatRepository: statRepository,
 		Config:         conf,
 	})
 
+	go statService.AddClick()
+
+	// Middlewares
 	stack := middleware.Chain(
 		middleware.CORS,
 		middleware.Logging,
 	)
+	return stack(router)
+}
 
-	server := &http.Server{
-		Addr:    ":8080",
-		Handler: stack(router),
+func main() {
+	app := App()
+	server := http.Server{
+		Addr:    ":8081",
+		Handler: app,
 	}
-
-	fmt.Println("localhost:8080")
+	fmt.Println("Server is listening on port 8081")
 	server.ListenAndServe()
 }
